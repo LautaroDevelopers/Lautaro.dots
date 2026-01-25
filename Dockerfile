@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     procps \
     file \
     locales \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Configurar locales (necesario para algunas herramientas)

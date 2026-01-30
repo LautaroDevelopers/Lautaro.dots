@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Configurar locales (necesario para algunas herramientas)
+# Configurar locales
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
@@ -42,7 +42,16 @@ RUN mkdir -p /var/run/sshd \
     && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
 # ============================================
-# 4. Instalar Homebrew como usuario lautaro
+# 4. Instalar OLLAMA (IA Model Runner)
+# ============================================
+# Instalamos Ollama globalmente
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
+# Configurar variable para que Ollama escuche en todas las interfaces (0.0.0.0)
+ENV OLLAMA_HOST=0.0.0.0
+
+# ============================================
+# 5. Instalar Homebrew como usuario lautaro
 # ============================================
 USER lautaro
 WORKDIR /home/lautaro
@@ -52,7 +61,7 @@ ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}
 RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # ============================================
-# 5. Instalar paquetes con Brew
+# 6. Instalar paquetes con Brew
 # ============================================
 RUN brew install \
     zsh \
@@ -73,25 +82,21 @@ RUN brew install \
     zsh-autosuggestions
 
 # ============================================
-# 6. Instalar fnm (Fast Node Manager)
+# 7. Instalar fnm y Bun
 # ============================================
 RUN curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir "/home/lautaro/.local/share/fnm" --skip-shell
-
-# ============================================
-# 7. Instalar Bun
-# ============================================
 RUN curl -fsSL https://bun.sh/install | bash
 
 # ============================================
-# 8. Copiar dotfiles a sus ubicaciones
+# 8. Copiar dotfiles y script de arranque
 # ============================================
-# Crear directorios de config
+# Crear directorios
 RUN mkdir -p /home/lautaro/.config/nvim \
     && mkdir -p /home/lautaro/.config/lazygit \
     && mkdir -p /home/lautaro/.config/zellij \
     && mkdir -p /home/lautaro/.config/starship
 
-# Copiar configs (como root para tener permisos, luego chown)
+# Copiar configs
 USER root
 COPY --chown=lautaro:lautaro nvim/ /home/lautaro/.config/nvim/
 COPY --chown=lautaro:lautaro lazygit/ /home/lautaro/.config/lazygit/
@@ -99,27 +104,24 @@ COPY --chown=lautaro:lautaro zellij/ /home/lautaro/.config/zellij/
 COPY --chown=lautaro:lautaro starship.toml /home/lautaro/.config/starship.toml
 COPY --chown=lautaro:lautaro .zshrc /home/lautaro/.zshrc
 
+# Copiar y dar permisos al entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # ============================================
-# 9. Cambiar shell por defecto a Zsh
+# 9. Configuración final
 # ============================================
 RUN chsh -s /home/linuxbrew/.linuxbrew/bin/zsh lautaro
 
-# ============================================
-# 10. Volver a usuario lautaro y configurar entorno
-# ============================================
 USER lautaro
-WORKDIR /home/lautaro
-
-# Variables de entorno para que todo funcione
 ENV SHELL=/home/linuxbrew/.linuxbrew/bin/zsh
 ENV STARSHIP_CONFIG=/home/lautaro/.config/starship.toml
 
-# ============================================
-# Exponer SSH y puerto para API
-# ============================================
 USER root
+# 22: SSH, 8080: API GO, 11434: OLLAMA API
 EXPOSE 22
 EXPOSE 8080
+EXPOSE 11434
 
-# Iniciar SSH
-CMD ["/usr/sbin/sshd", "-D"]
+# Usar el script personalizado
+CMD ["/entrypoint.sh"]

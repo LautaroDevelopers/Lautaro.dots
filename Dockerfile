@@ -42,24 +42,24 @@ RUN ln -s /usr/bin/batcat /usr/local/bin/bat && \
 # ============================================
 
 # --- Neovim (AppImage o Tarball es más ligero) ---
-RUN wget https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz -O /tmp/nvim.tar.gz && \
+RUN curl -L -o /tmp/nvim.tar.gz https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz && \
     tar -C /usr/local -xzf /tmp/nvim.tar.gz && \
     ln -s /usr/local/nvim-linux64/bin/nvim /usr/local/bin/nvim && \
     rm /tmp/nvim.tar.gz
 
 # --- Zellij ---
-RUN wget https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz -O /tmp/zellij.tar.gz && \
+RUN curl -L -o /tmp/zellij.tar.gz https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz && \
     tar -C /usr/local/bin -xzf /tmp/zellij.tar.gz && \
     rm /tmp/zellij.tar.gz && \
     chmod +x /usr/local/bin/zellij
 
 # --- LSD (Ls Deluxe) ---
-RUN wget https://github.com/lsd-rs/lsd/releases/download/v1.0.0/lsd_1.0.0_amd64.deb -O /tmp/lsd.deb && \
+RUN curl -L -o /tmp/lsd.deb https://github.com/lsd-rs/lsd/releases/download/v1.0.0/lsd_1.0.0_amd64.deb && \
     dpkg -i /tmp/lsd.deb && \
     rm /tmp/lsd.deb
 
 # --- Go 1.23 ---
-RUN wget https://go.dev/dl/go1.23.4.linux-amd64.tar.gz -O /tmp/go.tar.gz && \
+RUN curl -L -o /tmp/go.tar.gz https://go.dev/dl/go1.23.4.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf /tmp/go.tar.gz && \
     rm /tmp/go.tar.gz
 ENV PATH=$PATH:/usr/local/go/bin

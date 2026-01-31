@@ -28,13 +28,7 @@ ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
 # ============================================
-# 2. Instalar OLLAMA (IA Model Runner)
-# ============================================
-RUN curl -fsSL https://ollama.com/install.sh | sh
-ENV OLLAMA_HOST=0.0.0.0
-
-# ============================================
-# 3. Crear usuario lautaro con sudo
+# 2. Crear usuario lautaro con sudo
 # ============================================
 RUN useradd -m -s /bin/bash lautaro \
     && echo 'lautaro:lautaro' | chpasswd \
@@ -42,14 +36,14 @@ RUN useradd -m -s /bin/bash lautaro \
     && echo 'lautaro ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # ============================================
-# 4. Configurar SSH
+# 3. Configurar SSH
 # ============================================
 RUN mkdir -p /var/run/sshd \
     && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config \
     && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
 # ============================================
-# 5. Instalar Homebrew como usuario lautaro
+# 4. Instalar Homebrew como usuario lautaro
 # ============================================
 USER lautaro
 WORKDIR /home/lautaro
@@ -59,7 +53,7 @@ ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}
 RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # ============================================
-# 6. Instalar paquetes con Brew
+# 5. Instalar paquetes con Brew
 # ============================================
 RUN brew install \
     zsh \
@@ -81,13 +75,13 @@ RUN brew install \
     && brew cleanup
 
 # ============================================
-# 7. Instalar fnm y Bun
+# 6. Instalar fnm y Bun
 # ============================================
 RUN curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir "/home/lautaro/.local/share/fnm" --skip-shell
 RUN curl -fsSL https://bun.sh/install | bash
 
 # ============================================
-# 8. Copiar Dotfiles y script de arranque
+# 7. Copiar Dotfiles y script de arranque
 # ============================================
 USER root
 # Crear directorios
@@ -103,12 +97,16 @@ COPY --chown=lautaro:lautaro zellij/ /home/lautaro/.config/zellij/
 COPY --chown=lautaro:lautaro starship.toml /home/lautaro/.config/starship.toml
 COPY --chown=lautaro:lautaro .zshrc /home/lautaro/.zshrc
 
-# Copiar y dar permisos al entrypoint
+# Copiar y dar permisos al entrypoint (que ahora será simplificado)
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# Copiar y dar permisos al script de instalación de Ollama
+COPY install_ollama.sh /usr/local/bin/install_ollama.sh
+RUN chmod +x /usr/local/bin/install_ollama.sh
+
 # ============================================
-# 9. Configuración final
+# 8. Configuración final
 # ============================================
 RUN chsh -s /home/linuxbrew/.linuxbrew/bin/zsh lautaro
 

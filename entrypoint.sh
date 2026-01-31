@@ -4,11 +4,7 @@
 echo "🔒 Iniciando SSH Server..."
 /usr/sbin/sshd
 
-# Iniciar Ollama en background
-echo "🦙 Iniciando Ollama Server..."
-ollama serve &
-
 # Mantener el contenedor vivo
-echo "🚀 Todo listo. Servidor SSH y Ollama corriendo."
-echo "ℹ️  Para instalar modelos: ollama pull <modelo>"
+echo "🚀 Todo listo. Servidor SSH corriendo."
+echo "ℹ️  Para instalar Ollama, ejecutar: /usr/local/bin/install_ollama.sh"
 tail -f /dev/null

@@ -1,15 +1,24 @@
 export PATH="$HOME/.cargo/bin:$PATH"
 
-# Plugins de ZSH (Instalados manualmente en ~/.zsh/plugins)
-source ~/.zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
-source ~/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source ~/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [[ "$(uname)" == "Darwin" ]]; then
+    # macOS
+    BREW_BIN="/opt/homebrew/bin"
+else
+    # Linux
+    BREW_BIN="/home/linuxbrew/.linuxbrew/bin"
+fi
+
+# Usar la variable BREW_BIN donde se necesite
+eval "$($BREW_BIN/brew shellenv)"
+
+source $(dirname $BREW_BIN)/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+source $(dirname $BREW_BIN)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source $(dirname $BREW_BIN)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 export PROJECT_PATHS="/home/lautaro/Work/"
 export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git"
 export FZF_DEFAULT_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exlude .git"
-
 
 WM_VAR="/$ZELLIJ"
 # change with ZELLIJ

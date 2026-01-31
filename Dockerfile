@@ -3,9 +3,8 @@ FROM --platform=linux/amd64 ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # ============================================
-# 1. Dependencias base y herramientas de APT
+# 1. Dependencias base de Ubuntu + SSH Server
 # ============================================
-# Instalamos todo lo que esté en repo oficial para ahorrar espacio
 RUN apt-get update && apt-get install -y \
     openssh-server \
     sudo \
@@ -20,11 +19,6 @@ RUN apt-get update && apt-get install -y \
     locales \
     unzip \
     zstd \
-    zsh \
-    bat \
-    fd-find \
-    ripgrep \
-    fzf \
     && rm -rf /var/lib/apt/lists/*
 
 # Configurar locales
@@ -33,83 +27,68 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
-# Alias para bat y fd (en ubuntu se llaman batcat y fdfind)
-RUN ln -s /usr/bin/batcat /usr/local/bin/bat && \
-    ln -s /usr/bin/fdfind /usr/local/bin/fd
-
 # ============================================
-# 2. Instalación MANUAL de Herramientas (Sin Homebrew)
+# 2. Crear usuario lautaro con sudo
 # ============================================
-
-# --- Neovim (AppImage o Tarball es más ligero) ---
-RUN curl -L -o /tmp/nvim.tar.gz https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz && \
-    tar -C /usr/local -xzf /tmp/nvim.tar.gz && \
-    ln -s /usr/local/nvim-linux64/bin/nvim /usr/local/bin/nvim && \
-    rm /tmp/nvim.tar.gz
-
-# --- Zellij ---
-RUN curl -L -o /tmp/zellij.tar.gz https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz && \
-    tar -C /usr/local/bin -xzf /tmp/zellij.tar.gz && \
-    rm /tmp/zellij.tar.gz && \
-    chmod +x /usr/local/bin/zellij
-
-# --- LSD (Ls Deluxe) ---
-RUN curl -L -o /tmp/lsd.deb https://github.com/lsd-rs/lsd/releases/download/v1.0.0/lsd_1.0.0_amd64.deb && \
-    dpkg -i /tmp/lsd.deb && \
-    rm /tmp/lsd.deb
-
-# --- Go 1.23 ---
-RUN curl -L -o /tmp/go.tar.gz https://go.dev/dl/go1.23.4.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf /tmp/go.tar.gz && \
-    rm /tmp/go.tar.gz
-ENV PATH=$PATH:/usr/local/go/bin
-
-# --- Starship ---
-RUN curl -sS https://starship.rs/install.sh | sh -s -- -y
-
-# --- Ollama ---
-RUN curl -fsSL https://ollama.com/install.sh | sh
-ENV OLLAMA_HOST=0.0.0.0
-
-# ============================================
-# 3. Crear usuario lautaro
-# ============================================
-RUN useradd -m -s /bin/zsh lautaro \
+RUN useradd -m -s /bin/bash lautaro \
     && echo 'lautaro:lautaro' | chpasswd \
     && usermod -aG sudo lautaro \
     && echo 'lautaro ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # ============================================
-# 4. Configurar SSH
+# 3. Configurar SSH
 # ============================================
 RUN mkdir -p /var/run/sshd \
     && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config \
     && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
 # ============================================
-# 5. Configuración de Usuario (Scripts que no requieren root)
+# 4. Instalar OLLAMA (IA Model Runner)
+# ============================================
+RUN curl -fsSL https://ollama.com/install.sh | sh
+ENV OLLAMA_HOST=0.0.0.0
+
+# ============================================
+# 5. Instalar Homebrew como usuario lautaro
 # ============================================
 USER lautaro
 WORKDIR /home/lautaro
 
-# --- Zoxide, Atuin, Carapace (Scripts de install) ---
-RUN curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
-RUN curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh
-RUN curl -sS https://raw.githubusercontent.com/rsteube/carapace-bin/main/install.sh | bash -s -- -d ~/.local/bin
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
 
-# --- FNM & Bun ---
+RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# ============================================
+# 6. Instalar paquetes con Brew
+# ============================================
+# Agregamos 'brew cleanup' al final para intentar ahorrar algo de espacio
+RUN brew install \
+    zsh \
+    starship \
+    zellij \
+    neovim \
+    lazygit \
+    lsd \
+    bat \
+    fd \
+    fzf \
+    zoxide \
+    atuin \
+    carapace \
+    go \
+    zsh-autocomplete \
+    zsh-syntax-highlighting \
+    zsh-autosuggestions \
+    && brew cleanup
+
+# ============================================
+# 7. Instalar fnm y Bun
+# ============================================
 RUN curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir "/home/lautaro/.local/share/fnm" --skip-shell
 RUN curl -fsSL https://bun.sh/install | bash
 
-# --- Plugins ZSH (Manual clone porque no tenemos brew) ---
-RUN mkdir -p ~/.zsh/plugins && \
-    git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/plugins/zsh-autosuggestions && \
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.zsh/plugins/zsh-syntax-highlighting && \
-    git clone https://github.com/marlonrichert/zsh-autocomplete.git ~/.zsh/plugins/zsh-autocomplete
-
 # ============================================
-# 6. Copiar Dotfiles
+# 8. Copiar Dotfiles
 # ============================================
 USER root
 # Crear directorios
@@ -130,13 +109,13 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # ============================================
-# 7. Final
+# 9. Configuración final
 # ============================================
+RUN chsh -s /home/linuxbrew/.linuxbrew/bin/zsh lautaro
+
 USER lautaro
-ENV SHELL=/bin/zsh
+ENV SHELL=/home/linuxbrew/.linuxbrew/bin/zsh
 ENV STARSHIP_CONFIG=/home/lautaro/.config/starship.toml
-# Ajustamos PATH para incluir lo que instalamos manualmente
-ENV PATH="/home/lautaro/.local/bin:/home/lautaro/.cargo/bin:${PATH}"
 
 USER root
 EXPOSE 22

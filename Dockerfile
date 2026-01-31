@@ -43,13 +43,7 @@ RUN mkdir -p /var/run/sshd \
     && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
 # ============================================
-# 4. Instalar OLLAMA (IA Model Runner)
-# ============================================
-RUN curl -fsSL https://ollama.com/install.sh | sh
-ENV OLLAMA_HOST=0.0.0.0
-
-# ============================================
-# 5. Instalar Homebrew como usuario lautaro
+# 4. Instalar Homebrew como usuario lautaro
 # ============================================
 USER lautaro
 WORKDIR /home/lautaro
@@ -59,9 +53,8 @@ ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}
 RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # ============================================
-# 6. Instalar paquetes con Brew
+# 5. Instalar paquetes con Brew
 # ============================================
-# Agregamos 'brew cleanup' al final para intentar ahorrar algo de espacio
 RUN brew install \
     zsh \
     starship \
@@ -82,13 +75,13 @@ RUN brew install \
     && brew cleanup
 
 # ============================================
-# 7. Instalar fnm y Bun
+# 6. Instalar fnm y Bun
 # ============================================
 RUN curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir "/home/lautaro/.local/share/fnm" --skip-shell
 RUN curl -fsSL https://bun.sh/install | bash
 
 # ============================================
-# 8. Copiar Dotfiles
+# 7. Copiar Dotfiles
 # ============================================
 USER root
 # Crear directorios
@@ -104,12 +97,8 @@ COPY --chown=lautaro:lautaro zellij/ /home/lautaro/.config/zellij/
 COPY --chown=lautaro:lautaro starship.toml /home/lautaro/.config/starship.toml
 COPY --chown=lautaro:lautaro .zshrc /home/lautaro/.zshrc
 
-# Entrypoint
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 # ============================================
-# 9. Configuración final
+# 8. Configuración final
 # ============================================
 RUN chsh -s /home/linuxbrew/.linuxbrew/bin/zsh lautaro
 
@@ -120,6 +109,6 @@ ENV STARSHIP_CONFIG=/home/lautaro/.config/starship.toml
 USER root
 EXPOSE 22
 EXPOSE 8080
-EXPOSE 11434
 
-CMD ["/entrypoint.sh"]
+CMD ["/usr/sbin/sshd", "-D"]
+

@@ -4,25 +4,11 @@
 echo "🔒 Iniciando SSH Server..."
 /usr/sbin/sshd
 
-# Iniciar Ollama en background
+# Iniciar Ollama en background (sin descargar modelos automáticamente)
 echo "🦙 Iniciando Ollama Server..."
 ollama serve &
 
-# Esperar unos segundos a que Ollama arranque
-sleep 5
-
-# Chequear si el modelo ya existe, si no, descargarlo
-MODEL="qwen2.5-coder:32b"
-echo "🔍 Verificando modelo $MODEL..."
-
-if ! ollama list | grep -q "$MODEL"; then
-	echo "📥 El modelo no está. Iniciando descarga de $MODEL (Esto puede tardar dependiendo de la red de Railway)..."
-	ollama pull $MODEL
-	echo "✅ Modelo descargado y listo."
-else
-	echo "⚡ Modelo ya descargado. Listo para usar."
-fi
-
 # Mantener el contenedor vivo
-echo "🚀 Todo listo. Esperando conexiones..."
+echo "🚀 Todo listo. Servidor SSH y Ollama corriendo."
+echo "ℹ️  Para instalar modelos: ollama pull <modelo>"
 tail -f /dev/null

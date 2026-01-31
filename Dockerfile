@@ -42,7 +42,7 @@ RUN ln -s /usr/bin/batcat /usr/local/bin/bat && \
 # ============================================
 
 # --- Neovim (AppImage o Tarball es más ligero) ---
-RUN wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz -O /tmp/nvim.tar.gz && \
+RUN wget https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz -O /tmp/nvim.tar.gz && \
     tar -C /usr/local -xzf /tmp/nvim.tar.gz && \
     ln -s /usr/local/nvim-linux64/bin/nvim /usr/local/bin/nvim && \
     rm /tmp/nvim.tar.gz

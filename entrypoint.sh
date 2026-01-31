@@ -4,7 +4,7 @@
 echo "🔒 Iniciando SSH Server..."
 /usr/sbin/sshd
 
-# Iniciar Ollama en background (sin descargar modelos automáticamente)
+# Iniciar Ollama en background
 echo "🦙 Iniciando Ollama Server..."
 ollama serve &
 

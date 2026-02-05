@@ -527,49 +527,11 @@ else
 fi
 
 # ============================================
-# STEP 10: Flutter Development (Optional)
+# STEP 10: Set ZSH as default shell
 # ============================================
 echo ""
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${CYAN}Step 10: Flutter Development${NC}"
-echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-
-install_flutter=$(select_option "Install Flutter SDK? " "Yes" "No")
-
-if [ "$install_flutter" = "Yes" ]; then
-    FLUTTER_DIR="$HOME/develop/flutter"
-    
-    if [ ! -d "$FLUTTER_DIR" ]; then
-        info "Installing Flutter SDK..."
-        mkdir -p ~/develop
-        git clone https://github.com/flutter/flutter.git -b stable "$FLUTTER_DIR"
-        success "Flutter SDK installed at $FLUTTER_DIR"
-    else
-        success "Flutter already installed"
-        info "Updating Flutter..."
-        cd "$FLUTTER_DIR" && git pull && cd -
-    fi
-    
-    # Add to PATH if not present
-    if ! grep -q "flutter/bin" ~/.zshrc 2>/dev/null; then
-        echo 'export PATH="$HOME/develop/flutter/bin:$PATH"' >> ~/.zshrc
-        success "Flutter added to PATH"
-    fi
-    
-    # Run flutter doctor
-    export PATH="$FLUTTER_DIR/bin:$PATH"
-    info "Running flutter doctor..."
-    flutter doctor || true
-else
-    info "Skipping Flutter setup"
-fi
-
-# ============================================
-# STEP 11: Set ZSH as default shell
-# ============================================
-echo ""
-echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${CYAN}Step 11: Setting ZSH as default shell${NC}"
+echo -e "${CYAN}Step 10: Setting ZSH as default shell${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
 ZSH_PATH=$(which zsh)
@@ -601,9 +563,6 @@ echo "  • Bun, fnm, Node.js, Go"
 echo "  • OpenCode"
 if [ "$install_android" = "Yes" ]; then
     echo "  • Android SDK (Java, Gradle, Kotlin)"
-fi
-if [ "$install_flutter" = "Yes" ]; then
-    echo "  • Flutter SDK"
 fi
 echo ""
 echo -e "${YELLOW}Next steps:${NC}"

@@ -178,7 +178,8 @@ if is_arch; then
     
     # AUR packages
     AUR_PACKAGES=(
-        # Add AUR packages here if needed
+        zen-browser-bin
+        datagrip
     )
     
     for pkg in "${AUR_PACKAGES[@]}"; do
@@ -187,6 +188,25 @@ if is_arch; then
         else
             info "Installing $pkg from AUR..."
             yay -S --noconfirm "$pkg"
+        fi
+    done
+fi
+
+# macOS cask applications
+if is_mac; then
+    info "Installing macOS applications..."
+    
+    CASK_APPS=(
+        datagrip
+        zen-browser
+    )
+    
+    for app in "${CASK_APPS[@]}"; do
+        if brew list --cask "$app" &>/dev/null; then
+            success "$app already installed"
+        else
+            info "Installing $app..."
+            brew install --cask "$app"
         fi
     done
 fi

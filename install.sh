@@ -180,7 +180,6 @@ if is_arch; then
     AUR_PACKAGES=(
         zen-browser-bin
         datagrip
-        youtube-music-bin
     )
     
     for pkg in "${AUR_PACKAGES[@]}"; do

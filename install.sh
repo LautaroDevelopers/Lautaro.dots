@@ -343,11 +343,233 @@ if [ "$install_font" = "Yes" ]; then
 fi
 
 # ============================================
-# STEP 9: Set ZSH as default shell
+# STEP 9: Android Development Environment (Optional)
 # ============================================
 echo ""
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${CYAN}Step 9: Setting ZSH as default shell${NC}"
+echo -e "${CYAN}Step 9: Android Development Environment${NC}"
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+install_android=$(select_option "Install Android development environment? " "Yes" "No")
+
+if [ "$install_android" = "Yes" ]; then
+    info "Setting up Android development environment..."
+    
+    if is_arch; then
+        # ---- ARCH LINUX ----
+        info "Installing Java JDK 17 & 21..."
+        sudo pacman -S --needed --noconfirm jdk17-openjdk jdk21-openjdk
+        
+        info "Installing Gradle & Kotlin..."
+        sudo pacman -S --needed --noconfirm gradle kotlin
+        
+        # Set default Java version
+        info "Setting Java 21 as default..."
+        sudo archlinux-java set java-21-openjdk
+        
+        # Android SDK - Install via AUR or manual
+        if ! command -v sdkmanager &>/dev/null; then
+            info "Installing Android SDK command-line tools..."
+            
+            # Create SDK directory
+            sudo mkdir -p /opt/android-sdk
+            sudo chown -R $USER:$USER /opt/android-sdk
+            
+            # Download command-line tools
+            CMDLINE_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+            wget -q -O /tmp/cmdline-tools.zip "$CMDLINE_TOOLS_URL"
+            
+            # Extract to correct location
+            mkdir -p /opt/android-sdk/cmdline-tools
+            unzip -q -o /tmp/cmdline-tools.zip -d /tmp/
+            mv /tmp/cmdline-tools /opt/android-sdk/cmdline-tools/latest
+            
+            success "Android command-line tools installed"
+        fi
+        
+        # Install SDK components
+        info "Installing Android SDK components (this may take a while)..."
+        export ANDROID_HOME=/opt/android-sdk
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+        
+        # Accept licenses
+        yes | sdkmanager --licenses > /dev/null 2>&1 || true
+        
+        # Install essential SDK packages
+        sdkmanager "platform-tools" \
+                   "platforms;android-34" \
+                   "build-tools;34.0.0" \
+                   "emulator" \
+                   "system-images;android-34;google_apis;x86_64" || true
+        
+        success "Android SDK components installed"
+        
+        # Create AVD if emulator is installed
+        if command -v avdmanager &>/dev/null; then
+            if ! avdmanager list avd | grep -q "Pixel_8_API_34"; then
+                info "Creating Android Virtual Device..."
+                echo "no" | avdmanager create avd -n "Pixel_8_API_34" \
+                    -k "system-images;android-34;google_apis;x86_64" \
+                    --device "pixel_8" || true
+                success "AVD created: Pixel_8_API_34"
+            fi
+        fi
+        
+    elif is_mac; then
+        # ---- macOS ----
+        info "Installing Java JDK..."
+        brew install openjdk@17 openjdk@21
+        
+        info "Installing Gradle & Kotlin..."
+        brew install gradle kotlin
+        
+        # Android Studio (includes SDK)
+        info "Installing Android Studio..."
+        brew install --cask android-studio
+        
+        # After Android Studio installs, the SDK will be at ~/Library/Android/sdk
+        export ANDROID_HOME="$HOME/Library/Android/sdk"
+        
+        warn "After installation, open Android Studio to complete SDK setup"
+        
+    else
+        # ---- Debian/Ubuntu ----
+        info "Installing Java JDK..."
+        sudo apt-get install -y openjdk-17-jdk openjdk-21-jdk
+        
+        info "Installing Gradle..."
+        sudo apt-get install -y gradle
+        
+        # Kotlin via SDKMAN or snap
+        if ! command -v kotlin &>/dev/null; then
+            info "Installing Kotlin via snap..."
+            sudo snap install kotlin --classic || brew install kotlin
+        fi
+        
+        # Android SDK
+        if [ ! -d "$HOME/Android/Sdk" ]; then
+            info "Installing Android command-line tools..."
+            
+            mkdir -p ~/Android/Sdk/cmdline-tools
+            CMDLINE_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+            wget -q -O /tmp/cmdline-tools.zip "$CMDLINE_TOOLS_URL"
+            unzip -q -o /tmp/cmdline-tools.zip -d /tmp/
+            mv /tmp/cmdline-tools ~/Android/Sdk/cmdline-tools/latest
+            
+            export ANDROID_HOME="$HOME/Android/Sdk"
+            export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+            
+            yes | sdkmanager --licenses > /dev/null 2>&1 || true
+            sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" || true
+        fi
+    fi
+    
+    # Add Android environment to .zshrc if not present
+    if ! grep -q "ANDROID_HOME" ~/.zshrc 2>/dev/null; then
+        info "Adding Android environment variables to .zshrc..."
+        
+        if is_arch; then
+            cat >> ~/.zshrc << 'ANDROID_ENV'
+
+# Android Development Environment
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export PATH=$JAVA_HOME/bin:$PATH
+export ANDROID_HOME=/opt/android-sdk
+export PATH=$ANDROID_HOME/platform-tools:$PATH
+export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+export PATH=$ANDROID_HOME/emulator:$PATH
+ANDROID_ENV
+        elif is_mac; then
+            cat >> ~/.zshrc << 'ANDROID_ENV'
+
+# Android Development Environment
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+export PATH=$JAVA_HOME/bin:$PATH
+export ANDROID_HOME=$HOME/Library/Android/sdk
+export PATH=$ANDROID_HOME/platform-tools:$PATH
+export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+export PATH=$ANDROID_HOME/emulator:$PATH
+ANDROID_ENV
+        else
+            cat >> ~/.zshrc << 'ANDROID_ENV'
+
+# Android Development Environment
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$ANDROID_HOME/platform-tools:$PATH
+export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+export PATH=$ANDROID_HOME/emulator:$PATH
+ANDROID_ENV
+        fi
+        
+        success "Android environment variables added"
+    fi
+    
+    success "Android development environment configured!"
+    echo ""
+    echo -e "${CYAN}Android Tools Installed:${NC}"
+    echo "  • Java JDK 17 & 21"
+    echo "  • Gradle"
+    echo "  • Kotlin"
+    echo "  • Android SDK (platform-tools, build-tools, emulator)"
+    echo ""
+    echo -e "${YELLOW}Next steps for Android:${NC}"
+    echo "  1. Reload shell: source ~/.zshrc"
+    echo "  2. Open Neovim: nvim"
+    echo "  3. Run :Mason and install:"
+    echo "     - jdtls (Java Language Server)"
+    echo "     - kotlin-language-server"
+    echo "     - java-debug-adapter"
+    echo "  4. Read docs: ~/.config/nvim/ANDROID.md"
+else
+    info "Skipping Android development setup"
+fi
+
+# ============================================
+# STEP 10: Flutter Development (Optional)
+# ============================================
+echo ""
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${CYAN}Step 10: Flutter Development${NC}"
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+install_flutter=$(select_option "Install Flutter SDK? " "Yes" "No")
+
+if [ "$install_flutter" = "Yes" ]; then
+    FLUTTER_DIR="$HOME/develop/flutter"
+    
+    if [ ! -d "$FLUTTER_DIR" ]; then
+        info "Installing Flutter SDK..."
+        mkdir -p ~/develop
+        git clone https://github.com/flutter/flutter.git -b stable "$FLUTTER_DIR"
+        success "Flutter SDK installed at $FLUTTER_DIR"
+    else
+        success "Flutter already installed"
+        info "Updating Flutter..."
+        cd "$FLUTTER_DIR" && git pull && cd -
+    fi
+    
+    # Add to PATH if not present
+    if ! grep -q "flutter/bin" ~/.zshrc 2>/dev/null; then
+        echo 'export PATH="$HOME/develop/flutter/bin:$PATH"' >> ~/.zshrc
+        success "Flutter added to PATH"
+    fi
+    
+    # Run flutter doctor
+    export PATH="$FLUTTER_DIR/bin:$PATH"
+    info "Running flutter doctor..."
+    flutter doctor || true
+else
+    info "Skipping Flutter setup"
+fi
+
+# ============================================
+# STEP 11: Set ZSH as default shell
+# ============================================
+echo ""
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${CYAN}Step 11: Setting ZSH as default shell${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
 ZSH_PATH=$(which zsh)
@@ -370,17 +592,27 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 echo ""
 echo -e "${CYAN}Installed:${NC}"
 echo "  • Homebrew + core packages"
-echo "  • Neovim (LazyVim config)"
+echo "  • Neovim (LazyVim config with Android support)"
 echo "  • Zellij (terminal multiplexer)"
 echo "  • Starship prompt"
 echo "  • Lazygit"
 echo "  • FZF, fd, ripgrep, bat, lsd"
 echo "  • Bun, fnm, Node.js, Go"
 echo "  • OpenCode"
+if [ "$install_android" = "Yes" ]; then
+    echo "  • Android SDK (Java, Gradle, Kotlin)"
+fi
+if [ "$install_flutter" = "Yes" ]; then
+    echo "  • Flutter SDK"
+fi
 echo ""
 echo -e "${YELLOW}Next steps:${NC}"
 echo "  1. Restart your terminal or run: exec zsh"
 echo "  2. Open nvim to let LazyVim install plugins"
 echo "  3. Configure your SSH keys if needed"
+if [ "$install_android" = "Yes" ]; then
+    echo "  4. In nvim run :Mason to install jdtls, kotlin-language-server"
+    echo "  5. Read Android docs: cat ~/.config/nvim/ANDROID.md"
+fi
 echo ""
 echo -e "${MAGENTA}Enjoy your new setup! 🚀${NC}"

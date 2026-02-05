@@ -81,5 +81,15 @@ export PATH=$HOME/.local/bin:$PATH
 export PATH=/home/lautaro/.opencode/bin:$PATH
 export PATH="$HOME/develop/flutter/bin:$PATH"
 
-# Go export bins
-export PATH=$PATH:$(go env GOPATH)/bin
+# Go
+export GOROOT=/usr/lib/go
+export GOPATH=$HOME/Work/Go
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+export PATH=$JAVA_HOME/bin:$PATH
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export PATH=$JAVA_HOME/bin:$PATH
+export ANDROID_HOME=/opt/android-sdk
+export PATH=$ANDROID_HOME/platform-tools:$PATH
+export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH

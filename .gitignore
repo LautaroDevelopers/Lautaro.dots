@@ -1,0 +1,25 @@
+# Sensitive files
+**/antigravity-accounts.json
+**/*.key
+**/*.pem
+**/secrets*
+**/.env
+
+# Package managers
+node_modules/
+bun.lock
+package-lock.json
+
+# Caches
+.cache/
+*.log
+
+# History files (may contain sensitive data)
+*_history
+.bash_history
+.zsh_history
+atuin/
+
+# OS files
+.DS_Store
+Thumbs.db

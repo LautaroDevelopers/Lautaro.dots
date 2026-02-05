@@ -1,1 +1,0 @@
-toda la configuracion se ordenara por archvios separados, por ejemplo: para agregar oil (gestor de archvios) no lo agregarias a el overrides, sino que toda la configuracion se relizaria en un fichero por separado en oil.lua.

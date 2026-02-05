@@ -178,7 +178,9 @@ if is_arch; then
     
     # AUR packages
     AUR_PACKAGES=(
-        # Add AUR packages here if needed
+        zen-browser-bin
+        datagrip
+        youtube-music-bin
     )
     
     for pkg in "${AUR_PACKAGES[@]}"; do

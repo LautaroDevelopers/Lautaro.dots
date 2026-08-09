@@ -13,6 +13,7 @@ package-lock.json
 # Caches
 .cache/
 *.log
+.atl/
 
 # History files (may contain sensitive data)
 *_history

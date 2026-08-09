@@ -1,0 +1,120 @@
+@define-color highligth rgba(127,180,202,1);
+@define-color highligth-soft rgba(127,180,202,0.22);
+@define-color highligth-border rgba(127,180,202,0.45);
+@define-color accent-dark rgba(39,52,92,1);
+@define-color dark-9 rgba(24,24,27,1);
+@define-color dark-8 rgba(39,39,42,1);
+@define-color dark-8-soft rgba(39,39,42,0.45);
+@define-color dark-7 rgba(63,63,70,1);
+@define-color dark-7-soft rgba(63,63,70,0.45);
+@define-color urgent-soft rgba(220,81,73,0.25);
+
+* {
+  font-family: "FiraCode Nerd Font", sans-serif;
+  font-weight: 400;
+}
+
+window#waybar {
+  background-color: rgba(24, 24, 27, 0.6);
+  color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(127, 180, 202, 0.15);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+}
+
+#workspaces button {
+  padding: 3px 7px;
+  margin: 7px 0px 7px 7px;
+  background: transparent;
+  border-radius: 6px;
+  color: white;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+#workspaces button:hover {
+  background: rgba(127, 180, 202, 0.15);
+}
+
+#workspaces button.active {
+  background: @highligth-soft;
+  color: @highligth;
+  font-weight: 700;
+}
+
+#workspaces button.urgent {
+  background: @urgent-soft;
+  color: rgba(220, 81, 73, 1);
+  font-weight: 700;
+}
+
+#status {
+  padding: 4px 10px;
+  margin: 5px 10px 5px 0px;
+}
+
+#battery,
+#bluetooth,
+#custom-volume {
+  padding: 2px 5px;
+  margin: 0px 2px 0px 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+#battery:hover,
+#bluetooth:hover,
+#custom-volume:hover {
+  background: @dark-7-soft;
+}
+
+#battery.warning {
+  color: #e5c07b;
+}
+
+#battery.critical {
+  color: #e06c75;
+}
+
+#pulseaudio-volume {
+  padding: 2px 5px;
+  margin: 0px 2px 0px 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  font-size: 13px;
+}
+
+#pulseaudio-volume:hover {
+  background: @dark-7-soft;
+}
+
+#pulseaudio-slider {
+  min-width: 80px;
+}
+
+#pulseaudio-slider slider {
+  min-width: 13px;
+  min-height: 13px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+#pulseaudio-slider trough {
+  min-height: 5px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+#pulseaudio-slider highlight {
+  background: @highligth;
+  min-height: 5px;
+  border-radius: 5px;
+}
+
+tooltip {
+  background: @dark-9;
+  border-radius: 5px;
+  color: white;
+}

@@ -1,0 +1,184 @@
+;; ---------- variables ----------
+
+(defpoll weather :interval "30m" :initial "{\"icon\":\"?\",\"temp\":\"...\",\"cond\":\"\"}"
+  "scripts/weather.sh")
+
+(defpoll media_progress :interval "5s" :initial "0"
+  "scripts/media-progress.sh")
+
+(defpoll date_es :interval "30s"
+  "scripts/date-es.sh")
+
+(defvar media_reveal true)
+(defvar media_transition "slideleft")
+
+(deflisten media :initial "{\"title\":\"\",\"artist\":\"\",\"status\":\"Stopped\",\"art\":\"\",\"player\":\"\",\"index\":0,\"count\":0,\"dots\":[]}"
+  "scripts/media-players-listen.sh")
+
+(deflisten cava_bars :initial "[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]"
+  "scripts/cava-listen.sh")
+
+(defpoll notion_tasks :interval "3m" :initial "[]"
+  "scripts/notion-tasks.sh")
+
+(defpoll github_repos :interval "10m" :initial "[]"
+  "scripts/github-repos.sh")
+
+(defpoll audio_output :interval "12h" :initial "speakers"
+  "cat $HOME/.cache/eww-audio-output 2>/dev/null || echo speakers")
+
+(deflisten audio_vol :initial "{\"volume\":0,\"muted\":false}"
+  "scripts/audio-volume-listen.sh")
+
+;; ---------- widgets ----------
+
+(defwidget clock-widget []
+  (box :class "clock-widget" :orientation "v" :space-evenly false :halign "start" :valign "center"
+    (label :class "clock-time" :text {formattime(EWW_TIME, "%H:%M", "America/Argentina/Mendoza")})
+    (box :class "clock-date-row" :orientation "h" :space-evenly false :halign "start"
+      (label :class "clock-icon" :text "󰃭")
+      (label :class "clock-date" :text date_es))))
+
+(defwidget weather-widget []
+  (box :class "weather-widget" :orientation "h" :space-evenly false :halign "start" :valign "center"
+    (label :class "weather-icon" :text {weather.icon})
+    (box :class "weather-info" :orientation "v" :space-evenly false :halign "start"
+      (label :class "weather-temp" :halign "start" :text {weather.temp})
+      (label :class "weather-cond" :halign "start" :text {weather.cond}))))
+
+(defwidget topleft-widget []
+  (box :class "widget topleft-widget" :orientation "h" :space-evenly false :halign "start" :valign "center" :spacing 18
+    (clock-widget)
+    (box :class "topleft-divider")
+    (weather-widget)))
+
+(defwidget work-clock-widget []
+  (box :class "widget work-clock-widget"
+    (clock-widget)))
+
+(defwidget media-widget []
+  (box :class "widget media-widget" :orientation "h" :space-evenly false :halign "start" :valign "end"
+    (button :class "media-nav-btn" :visible {media.count > 1} :onclick "scripts/media-cycle.sh left" "‹")
+    (image :class "media-art" :path {media.art != "" ? media.art : "/usr/share/icons/Adwaita/scalable/mimetypes/audio-x-generic.svg"} :image-width 72 :image-height 72)
+    (revealer :transition media_transition :duration "180ms" :reveal media_reveal
+      (box :class "media-info" :orientation "v" :space-evenly false :valign "center"
+        (label :class "media-title" :limit-width 26 :halign "start" :text {media.title == "" ? "Nada sonando" : media.title})
+        (label :class "media-artist" :limit-width 26 :halign "start" :text {media.artist})
+        (progress :class "media-progress" :value media_progress :orientation "h")
+        (box :class "media-controls" :orientation "h" :space-evenly false :halign "start"
+          (button :class "media-btn" :onclick "playerctl -p ${media.player} previous" "󰒮")
+          (button :class "media-btn media-btn-main" :onclick "playerctl -p ${media.player} play-pause" {media.status == "Playing" ? "󰏤" : "󰐊"})
+          (button :class "media-btn" :onclick "playerctl -p ${media.player} next" "󰒭"))
+        (box :class "media-dots" :orientation "h" :halign "start" :space-evenly false :spacing 4
+          (for dot in {media.dots}
+            (box :class "media-dot ${dot ? "active" : ""}")))))
+    (button :class "media-nav-btn" :visible {media.count > 1} :onclick "scripts/media-cycle.sh right" "›")))
+
+(defwidget audio-widget []
+  (box :class "widget audio-widget" :orientation "v" :space-evenly false :spacing 10
+    (box :orientation "h" :space-evenly false :spacing 10 :valign "center"
+      (button :class "audio-icon" :onclick "scripts/audio-mute-toggle.sh"
+        (label :text {audio_vol.muted ? "󰖁" : (audio_vol.volume > 60 ? "󰕾" : (audio_vol.volume > 0 ? "󰖀" : "󰕿"))}))
+      (scale :class "audio-slider" :min 0 :max 100 :value {audio_vol.volume} :hexpand true
+        :onchange "scripts/audio-volume-set.sh {}")
+      (label :class "audio-pct" :text "${audio_vol.volume}%"))
+    (box :class "audio-devices" :orientation "h" :space-evenly true :spacing 6
+      (button :class "audio-device-btn ${audio_output == "speakers" ? "active" : ""}"
+        :onclick "scripts/audio-switch.sh speakers"
+        (box :orientation "h" :space-evenly false :spacing 6 :halign "center"
+          (label :class "audio-device-icon" :text "󰓃")
+          (label :class "audio-device-label" :text "Altavoces")))
+      (button :class "audio-device-btn ${audio_output == "hdmi" ? "active" : ""}"
+        :onclick "scripts/audio-switch.sh hdmi"
+        (box :orientation "h" :space-evenly false :spacing 6 :halign "center"
+          (label :class "audio-device-icon" :text "󰍹")
+          (label :class "audio-device-label" :text "HDMI"))))))
+
+(defwidget tasks-widget []
+  (box :class "widget tasks-widget" :orientation "v" :space-evenly false :spacing 8
+    (box :class "tasks-header" :orientation "h" :space-evenly false :spacing 8
+      (label :class "tasks-icon" :text "󰄵")
+      (label :class "tasks-title" :text "TAREAS"))
+    (box :orientation "v" :space-evenly false :spacing 4 :hexpand true
+      (for task in notion_tasks
+        (box :class "task-row" :orientation "h" :space-evenly false :spacing 6 :halign "start" :hexpand true
+          (button :class "task-name-btn" :onclick "xdg-open '${task.url}' &" :hexpand true
+            (label :class "task-name" :limit-width 28 :halign "start" :hexpand true :text {task.name})))))))
+
+(defwidget repos-widget []
+  (box :class "widget repos-widget" :orientation "v" :space-evenly false :spacing 8
+    (box :class "repos-header" :orientation "h" :space-evenly false :spacing 8
+      (label :class "repos-icon" :text "󰊤")
+      (label :class "repos-title" :text "REPOS"))
+    (box :orientation "v" :space-evenly false :spacing 4 :hexpand true
+      (for repo in github_repos
+        (box :class "repo-row" :orientation "h" :space-evenly false :spacing 8 :halign "start" :hexpand true
+          (label :class "repo-lock" :text {repo.isPrivate ? "󰌾" : "󰊢"})
+          (button :class "repo-name-btn" :onclick "xdg-open '${repo.url}' &" :hexpand true
+            (label :class "repo-name" :limit-width 26 :halign "start" :hexpand true :text {repo.name})))))))
+
+(defwidget visualizer-widget []
+  (box :class "visualizer-widget" :orientation "h" :space-evenly true :valign "end" :halign "end" :spacing 3
+    (for bar in cava_bars
+      (box :class "cava-bar" :valign "end" :style "min-height: ${bar > 3 ? bar : 3}px;"))))
+
+;; ---------- windows ----------
+
+(defwindow topleft
+  :monitor 0
+  :windowtype "desktop"
+  :stacking "bottom"
+  :geometry (geometry :x "20px" :y "20px" :width "0px" :height "0px" :anchor "top left")
+  (topleft-widget))
+
+(defwindow media
+  :monitor 0
+  :windowtype "desktop"
+  :stacking "bottom"
+  :geometry (geometry :x "20px" :y "20px" :width "0px" :height "0px" :anchor "bottom left")
+  (media-widget))
+
+(defwindow audio
+  :monitor 0
+  :windowtype "desktop"
+  :stacking "bottom"
+  :geometry (geometry :x "20px" :y "20px" :width "0px" :height "0px" :anchor "top right")
+  (audio-widget))
+
+(defwindow tasks
+  :monitor 0
+  :windowtype "desktop"
+  :stacking "bottom"
+  :geometry (geometry :x "20px" :y "20px" :width "0px" :height "0px" :anchor "top right")
+  (tasks-widget))
+
+(defwindow work-clock
+  :monitor 0
+  :windowtype "desktop"
+  :stacking "bottom"
+  :geometry (geometry :x "20px" :y "20px" :width "0px" :height "0px" :anchor "top left")
+  (work-clock-widget))
+
+(defwindow repos
+  :monitor 0
+  :windowtype "desktop"
+  :stacking "bottom"
+  :geometry (geometry :x "20px" :y "20px" :width "0px" :height "0px" :anchor "bottom left")
+  (repos-widget))
+
+(defwindow visualizer
+  :monitor 0
+  :windowtype "desktop"
+  :stacking "bottom"
+  :geometry (geometry :x "20px" :y "20px" :width "0px" :height "0px" :anchor "bottom right")
+  (visualizer-widget))
+
+;; ventana dummy usada por scripts/monitor-index.sh para resolver el
+;; índice de monitor de eww a partir del nombre de salida de Hyprland;
+;; nunca se muestra contenido real, así que no puede pisar otras ventanas.
+(defwindow __monitor_probe__
+  :monitor 0
+  :windowtype "desktop"
+  :stacking "bottom"
+  :geometry (geometry :x "0px" :y "0px" :width "1px" :height "1px")
+  (box))

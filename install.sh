@@ -304,6 +304,21 @@ rm -rf ~/.config/warp-terminal
 ln -sf "$DOTFILES_DIR/warp-terminal" ~/.config/warp-terminal
 success "warp-terminal config linked"
 
+# Hyprland desktop (Linux/Wayland only)
+if ! is_mac; then
+    rm -rf ~/.config/hypr
+    ln -sf "$DOTFILES_DIR/hypr" ~/.config/hypr
+    success "hypr config linked"
+
+    rm -rf ~/.config/eww
+    ln -sf "$DOTFILES_DIR/eww" ~/.config/eww
+    success "eww config linked"
+
+    rm -rf ~/.config/waybar
+    ln -sf "$DOTFILES_DIR/waybar" ~/.config/waybar
+    success "waybar config linked"
+fi
+
 # Shell configs
 ln -sf "$DOTFILES_DIR/.zshrc" ~/.zshrc
 ln -sf "$DOTFILES_DIR/.bashrc" ~/.bashrc

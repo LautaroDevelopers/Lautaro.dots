@@ -1,0 +1,370 @@
+$highlight: rgba(127, 180, 202, 1);
+$highlight-soft: rgba(127, 180, 202, 0.85);
+$accent-dark: rgba(39, 52, 92, 1);
+$glass-bg: rgba(28, 28, 32, 0.5);
+$hairline: rgba(255, 255, 255, 0.09);
+
+* {
+  font-family: "Noto Sans", "FiraCode Nerd Font", sans-serif;
+}
+
+window {
+  background-color: transparent;
+}
+
+.widget {
+  background-color: $glass-bg;
+  color: #ffffff;
+  border-radius: 22px;
+  padding: 16px 20px;
+}
+
+.widget label,
+.widget .weather-icon,
+.widget .media-btn {
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
+
+.topleft-widget {
+  min-width: 420px;
+}
+
+.clock-widget {
+  min-width: 220px;
+}
+
+.weather-widget {
+  min-width: 150px;
+}
+
+.topleft-divider {
+  min-width: 1px;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.media-widget {
+  min-width: 320px;
+}
+
+.visualizer-widget {
+  min-width: 640px;
+  min-height: 140px;
+  padding: 0px 10px;
+}
+
+/* ---------- reloj ---------- */
+
+.clock-time {
+  font-family: "Noto Sans Thin", "Noto Sans";
+  font-weight: 200;
+  font-size: 46px;
+  color: #ffffff;
+}
+
+.clock-date-row {
+  margin-top: 2px;
+}
+
+.clock-icon {
+  font-family: "FiraCode Nerd Font";
+  font-size: 12px;
+  color: $highlight;
+  margin-right: 6px;
+}
+
+.clock-date {
+  font-family: "Noto Sans Medium", "Noto Sans";
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ---------- clima ---------- */
+
+.weather-icon {
+  font-size: 34px;
+  margin-right: 12px;
+}
+
+.weather-temp {
+  font-family: "Noto Sans Light", "Noto Sans";
+  font-weight: 300;
+  font-size: 26px;
+  color: #ffffff;
+}
+
+.weather-cond {
+  font-family: "Noto Sans";
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ---------- media ---------- */
+
+.media-art {
+  border-radius: 14px;
+}
+
+.media-info {
+  margin-left: 14px;
+  min-width: 190px;
+}
+
+.media-title {
+  font-family: "Noto Sans Medium", "Noto Sans";
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.media-artist {
+  font-family: "Noto Sans";
+  font-size: 12px;
+  color: $highlight-soft;
+  margin-bottom: 6px;
+}
+
+.media-progress {
+  min-height: 3px;
+  margin-top: 2px;
+}
+
+.media-progress progress {
+  background-color: $highlight;
+  border-radius: 3px;
+}
+
+.media-progress trough {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  min-height: 3px;
+}
+
+.media-controls {
+  margin-top: 8px;
+}
+
+.media-dots {
+  margin-top: 6px;
+}
+
+.media-dot {
+  min-width: 5px;
+  min-height: 5px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.media-dot.active {
+  background-color: $highlight;
+}
+
+.media-nav-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 22px;
+  padding: 0px 6px;
+  min-width: 18px;
+}
+
+.media-nav-btn:hover {
+  color: #ffffff;
+}
+
+.media-btn {
+  color: #ffffff;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  font-family: "FiraCode Nerd Font";
+  font-size: 15px;
+  min-width: 26px;
+  min-height: 26px;
+  padding: 0px;
+}
+
+.media-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.media-btn-main {
+  font-size: 18px;
+  color: $highlight;
+}
+
+/* ---------- audio ---------- */
+
+.audio-widget {
+  min-width: 260px;
+}
+
+.audio-icon {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-family: "FiraCode Nerd Font";
+  font-size: 24px;
+  padding: 0px;
+  min-width: 30px;
+}
+
+.audio-icon:hover {
+  color: $highlight;
+}
+
+.audio-pct {
+  font-family: "Noto Sans Medium", "Noto Sans";
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  min-width: 34px;
+}
+
+.audio-slider {
+  min-width: 130px;
+}
+
+.audio-slider trough {
+  min-height: 5px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.audio-slider highlight {
+  min-height: 5px;
+  border-radius: 5px;
+  background: $highlight;
+}
+
+.audio-slider slider {
+  min-width: 13px;
+  min-height: 13px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.audio-device-btn {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.75);
+  border: none;
+  border-radius: 12px;
+  padding: 7px 12px;
+}
+
+.audio-device-icon {
+  font-family: "FiraCode Nerd Font";
+  font-size: 16px;
+  margin-right: 4px;
+}
+
+.audio-device-label {
+  font-family: "Noto Sans Medium", "Noto Sans";
+  font-size: 12px;
+}
+
+.audio-device-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.audio-device-btn.active {
+  background: $highlight-soft;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* ---------- tareas (notion) ---------- */
+
+.tasks-widget {
+  min-width: 280px;
+}
+
+.tasks-icon {
+  font-family: "FiraCode Nerd Font";
+  font-size: 16px;
+  color: $highlight;
+}
+
+.tasks-title {
+  font-family: "Noto Sans Medium", "Noto Sans";
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.5px;
+}
+
+.task-row {
+  padding: 2px 0px;
+}
+
+.task-name-btn {
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  border-radius: 6px;
+  min-width: 220px;
+}
+
+.task-name-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.task-name {
+  font-family: "Noto Sans";
+  font-size: 13px;
+  color: #ffffff;
+}
+
+/* ---------- repos (github) ---------- */
+
+.repos-widget {
+  min-width: 280px;
+}
+
+.repos-icon {
+  font-family: "FiraCode Nerd Font";
+  font-size: 16px;
+  color: $highlight;
+}
+
+.repos-title {
+  font-family: "Noto Sans Medium", "Noto Sans";
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.5px;
+}
+
+.repo-row {
+  padding: 2px 0px;
+}
+
+.repo-lock {
+  font-family: "FiraCode Nerd Font";
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  min-width: 20px;
+}
+
+.repo-name-btn {
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  border-radius: 6px;
+  min-width: 220px;
+}
+
+.repo-name-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.repo-name {
+  font-family: "Noto Sans";
+  font-size: 13px;
+  color: #ffffff;
+}
+
+/* ---------- visualizador ---------- */
+
+.cava-bar {
+  min-width: 4px;
+  background-color: $highlight;
+  border-radius: 0px;
+  transition: min-height 0.05s linear;
+}
